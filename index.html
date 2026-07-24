@@ -1,239 +1,629 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proofism • Deep Analysis</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-color: #030303;
-            --text-color: #ffffff;
-            --accent-green: #00ff41;
-            --glow-color: rgba(0, 255, 65, 0.2);
-            --border-color: #2a2a2a;
-            --polished-gradient: linear-gradient(135deg, #151515 0%, #0a0a0a 100%);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanish — Borrador inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #08080d;
+    --panel: #121218;
+    --panel-2: #16161e;
+    --border: rgba(255,255,255,0.07);
+    --text: #ECECF3;
+    --muted: #8B8FA3;
+    --accent: #8B5CFF;
+    --accent-2: #34E4C1;
+    --accent-glow: rgba(139,92,255,0.55);
+    --danger: #FF6B6B;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+  ::selection{background:var(--accent-glow);}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+  .app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 
-        .container { width: 100%; max-width: 550px; padding: 20px; text-align: center; }
+  /* ---------- TOPBAR ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 22px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0b0b12,#08080d);
+    flex-shrink:0;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;}
+  .brand-mark{
+    width:22px;height:22px;border-radius:7px;
+    background:conic-gradient(from 220deg, var(--accent), var(--accent-2), var(--accent));
+    box-shadow:0 0 16px var(--accent-glow);
+    position:relative;flex-shrink:0;
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:6px;background:var(--bg);border-radius:4px;
+  }
+  .brand small{color:var(--muted);font-family:'Inter';font-weight:500;font-size:11px;letter-spacing:0.03em;margin-left:6px;}
+  .topbar-actions{display:flex;gap:10px;}
 
-        /* --- HEADER --- */
-        header h1 { font-size: 3.5rem; font-weight: 300; margin: 0; letter-spacing: -2px; }
-        .sub-title { font-size: 0.7rem; letter-spacing: 4px; color: #555; text-transform: uppercase; margin-bottom: 40px; }
+  .btn{
+    font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;
+    padding:9px 16px;border-radius:10px;border:1px solid transparent;
+    cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn:disabled{opacity:0.35;cursor:not-allowed;}
+  .btn-ghost{background:var(--panel-2);color:var(--text);border-color:var(--border);}
+  .btn-ghost:hover:not(:disabled){border-color:rgba(255,255,255,0.18);}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#6E3FE0);color:#fff;box-shadow:0 4px 20px rgba(139,92,255,0.35);}
+  .btn-primary:hover:not(:disabled){box-shadow:0 4px 26px rgba(139,92,255,0.55);}
+  .btn-danger-ghost{background:transparent;color:var(--danger);border-color:rgba(255,107,107,0.35);}
+  .btn-danger-ghost:hover:not(:disabled){background:rgba(255,107,107,0.08);}
+  .btn-block{width:100%;justify-content:center;}
 
-        /* --- CARDS CON BRILLO --- */
-        .option-card {
-            background: var(--polished-gradient);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 22px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            text-decoration: none;
-            color: white;
-            box-shadow: 0 0 0px rgba(0,0,0,0);
-        }
-        .option-card:hover { 
-            border-color: var(--accent-green); 
-            box-shadow: 0 0 15px var(--glow-color);
-            transform: translateY(-2px);
-        }
+  /* ---------- WORKSPACE ---------- */
+  .workspace{display:flex;flex:1;min-height:0;}
 
-        /* --- BOTONES DE RESPUESTA --- */
-        .btn-ans { 
-            background: rgba(255,255,255,0.02); 
-            border: 1px solid #333; 
-            color: #ccc; 
-            padding: 18px; 
-            width: 100%; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            text-align: left;
-            font-size: 0.95rem;
-            transition: 0.3s;
-        }
-        .btn-ans:hover { 
-            background: rgba(0, 255, 65, 0.05); 
-            border-color: var(--accent-green);
-            color: white;
-            box-shadow: 0 0 10px var(--glow-color);
-        }
+  .tool-rail{
+    width:66px;flex-shrink:0;border-right:1px solid var(--border);
+    display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 0;
+    background:#0a0a10;
+  }
+  .tool{
+    width:42px;height:42px;border-radius:12px;border:1px solid transparent;
+    background:transparent;color:var(--muted);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;position:relative;
+  }
+  .tool svg{width:20px;height:20px;}
+  .tool.active{
+    background:rgba(139,92,255,0.14);border-color:rgba(139,92,255,0.4);color:var(--accent);
+    box-shadow:0 0 18px rgba(139,92,255,0.25);
+  }
+  .tool:disabled{opacity:0.3;cursor:not-allowed;}
+  .tool[data-soon]::after{
+    content:attr(data-soon);position:absolute;left:56px;top:50%;transform:translateY(-50%);
+    background:#1c1c26;color:var(--text);font-size:11px;padding:5px 9px;border-radius:7px;
+    white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;border:1px solid var(--border);
+  }
+  .tool[data-soon]:hover::after{opacity:1;}
 
-        /* --- TEXTAREA --- */
-        textarea {
-            width: 100%; background: #0a0a0a; border: 1px solid #333; color: white;
-            padding: 15px; border-radius: 10px; font-family: inherit; margin-bottom: 15px; resize: none;
-            box-sizing: border-box;
-        }
-        textarea:focus { border-color: var(--accent-green); outline: none; }
+  .canvas-area{
+    flex:1;display:flex;align-items:center;justify-content:center;position:relative;
+    background:
+      linear-gradient(180deg, rgba(139,92,255,0.05), transparent 40%),
+      repeating-conic-gradient(#101018 0% 25%, #0c0c12 0% 50%) 50% / 24px 24px;
+    padding:30px;overflow:auto;
+  }
 
-        /* --- PANTALLAS --- */
-        #loader-screen, #test-area, #processing-screen, #result-screen { display: none; }
-        #loader-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; font-family: monospace; }
-        
-        .gear { font-size: 3rem; color: #555; animation: spin 2s linear infinite; margin-bottom: 20px; }
-        #timer { font-family: monospace; font-size: 1.8rem; color: var(--accent-green); text-shadow: 0 0 10px var(--glow-color); }
-        
-        .percent { font-size: 5rem; font-weight: bold; margin: 20px 0; color: var(--accent-green); text-shadow: 0 0 20px var(--glow-color); }
-        .close-x { display: none; position: fixed; top: 20px; right: 20px; font-size: 2.5rem; cursor: pointer; color: #444; }
+  .dropzone{
+    width:min(560px,90%);padding:60px 30px;border:2px dashed rgba(255,255,255,0.14);
+    border-radius:18px;text-align:center;cursor:pointer;transition:all .15s ease;
+    background:rgba(255,255,255,0.015);
+  }
+  .dropzone.drag{border-color:var(--accent);background:rgba(139,92,255,0.06);}
+  .dropzone svg{width:46px;height:46px;color:var(--accent);margin-bottom:14px;filter:drop-shadow(0 0 10px var(--accent-glow));}
+  .dropzone p{margin:0;font-size:15px;color:var(--text);font-weight:500;}
+  .dropzone span{display:block;margin-top:6px;color:var(--muted);font-size:13px;font-weight:400;}
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
+  .canvas-wrap{position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);border-radius:4px;line-height:0;}
+  canvas{display:block;border-radius:4px;}
+  #maskCanvas{position:absolute;top:0;left:0;cursor:none;}
+
+  .brush-cursor{
+    position:absolute;border-radius:50%;pointer-events:none;
+    border:1.5px solid var(--accent);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.4), 0 0 14px var(--accent-glow);
+    transform:translate(-50%,-50%);opacity:0;transition:opacity .1s;
+  }
+
+  .processing-overlay{
+    position:absolute;inset:0;background:rgba(6,6,10,0.55);backdrop-filter:blur(2px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    border-radius:4px;overflow:hidden;
+  }
+  .scan-line{
+    position:absolute;left:0;right:0;height:2px;
+    background:linear-gradient(90deg, transparent, var(--accent-2), var(--accent), transparent);
+    box-shadow:0 0 20px var(--accent-2);
+    animation:scan 1.4s ease-in-out infinite;
+  }
+  @keyframes scan{
+    0%{top:0; opacity:0;}
+    10%{opacity:1;}
+    90%{opacity:1;}
+    100%{top:100%; opacity:0;}
+  }
+  .processing-overlay span{
+    font-family:'Sora',sans-serif;font-weight:600;font-size:13.5px;color:var(--text);
+    background:rgba(18,18,24,0.8);padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+    z-index:2;
+  }
+
+  /* ---------- RIGHT PANEL ---------- */
+  .panel{
+    width:280px;flex-shrink:0;border-left:1px solid var(--border);
+    background:var(--panel);padding:20px;overflow-y:auto;
+    display:flex;flex-direction:column;gap:22px;
+  }
+  .panel-section h3{
+    margin:0 0 12px;font-family:'Sora',sans-serif;font-size:12px;text-transform:uppercase;
+    letter-spacing:0.08em;color:var(--muted);font-weight:600;
+  }
+  .panel-section label{display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:8px;}
+  .panel-section label span{color:var(--accent);font-weight:600;}
+  input[type="range"]{
+    -webkit-appearance:none;width:100%;height:5px;border-radius:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+    background:#fff;box-shadow:0 0 0 3px rgba(139,92,255,0.5), 0 2px 6px rgba(0,0,0,0.4);cursor:pointer;
+  }
+  .actions{display:flex;flex-direction:column;gap:10px;}
+  .row{display:flex;gap:10px;}
+  .row .btn{flex:1;}
+  .note{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+  .note p{margin:0;font-size:12.5px;line-height:1.55;color:var(--muted);}
+  .note b{color:var(--text);}
+
+  @media (max-width:840px){
+    .panel{width:230px;padding:16px;}
+    .tool-rail{width:56px;}
+  }
+</style>
 </head>
 <body>
+<div class="app">
 
-    <div class="container" id="main-menu">
-        <header>
-            <h1>Proofism</h1>
-            <div class="sub-title">autism tests and characteristics</div>
-        </header>
-        
-        <div class="option-card" onclick="startTest(30)">
-            <span>30 preguntas (Nivel I)</span>
-            <i class="fas fa-microchip"></i>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark"></span>Vanish<small>BORRADOR IA · LOCAL</small></div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="uploadBtn">Subir imagen</button>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+      <button class="btn btn-primary" id="downloadBtn" disabled>Descargar</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+
+    <aside class="tool-rail">
+      <button class="tool active" title="Borrar objeto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H8.5L3 14.5a1 1 0 0 1 0-1.4l9-9a1 1 0 0 1 1.4 0l6.1 6.1a1 1 0 0 1 0 1.4L13.5 18"/><path d="M7 13l5 5"/></svg>
+      </button>
+      <button class="tool" disabled data-soon="Reemplazo IA · Próximamente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+      </button>
+      <button class="tool" disabled data-soon="Quitar fondo · Próximamente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2.2"/><path d="M21 15l-5-5-9 9"/></svg>
+      </button>
+      <button class="tool" disabled data-soon="Mejorar calidad · Próximamente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.3L18 9l-4.1 1.7L12 15l-1.9-4.3L6 9l4.1-1.7L12 3z"/><path d="M19 15l.8 1.8L21.5 17l-1.7.8L19 19.5l-.8-1.7-1.7-.8 1.7-.8L19 15z"/></svg>
+      </button>
+    </aside>
+
+    <main class="canvas-area" id="canvasArea">
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <p>Arrastra una foto aquí<br><span>o haz clic para subir desde tu equipo</span></p>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap" hidden>
+        <canvas id="workCanvas"></canvas>
+        <canvas id="maskCanvas"></canvas>
+        <div class="brush-cursor" id="brushCursor"></div>
+        <div class="processing-overlay" id="processingOverlay" hidden>
+          <div class="scan-line"></div>
+          <span id="processingText">Analizando la zona…</span>
         </div>
-        <div class="option-card" onclick="startTest(50)">
-            <span>50 preguntas (Nivel II)</span>
-            <i class="fas fa-brain"></i>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <div class="panel-section">
+        <h3>Pincel</h3>
+        <label>Tamaño <span id="brushSizeLabel">42</span>px</label>
+        <input type="range" id="brushSize" min="10" max="150" value="42">
+      </div>
+
+      <div class="panel-section actions">
+        <h3>Acciones</h3>
+        <button class="btn btn-primary btn-block" id="eraseBtn" disabled>Borrar objeto</button>
+        <div class="row">
+          <button class="btn btn-ghost" id="clearMaskBtn" disabled>Limpiar pincel</button>
+          <button class="btn btn-ghost" id="undoBtn" disabled>Deshacer</button>
         </div>
-        <div class="option-card" onclick="startTest(100)">
-            <span>100 preguntas (Análisis Total)</span>
-            <i class="fas fa-database"></i>
-        </div>
+        <button class="btn btn-danger-ghost" id="resetBtn" disabled>Empezar de nuevo</button>
+      </div>
 
-        <a href="https://colmenares0910-code.github.io/mi-pagina./" class="option-card" style="margin-top: 30px; border-color: #444;">
-            <span>sebbi/web</span>
-            <i class="fas fa-external-link-alt"></i>
-        </a>
-    </div>
+      <div class="panel-section note">
+        <p><b>Cómo funciona:</b> pinta sobre lo que quieres eliminar y presiona "Borrar objeto". El relleno se calcula al 100% en tu navegador con un algoritmo de inpainting multiescala (difusión por pirámides) — sin servidores ni APIs externas. Funciona mejor sobre fondos lisos o texturizados; objetos sobre fondos muy complejos pueden dejar un resultado más suave que el original.</p>
+      </div>
+    </aside>
 
-    <div id="loader-screen">
-        <div id="matrix-lines" style="color: var(--accent-green); width: 80%; font-size: 0.8rem;"></div>
-    </div>
+  </div>
+</div>
 
-    <div class="container" id="test-area">
-        <div id="question-container"></div>
-    </div>
+<script>
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const dropzone = document.getElementById('dropzone');
+const canvasWrap = document.getElementById('canvasWrap');
+const workCanvas = document.getElementById('workCanvas');
+const maskCanvas = document.getElementById('maskCanvas');
+const ctx = workCanvas.getContext('2d', {willReadFrequently:true});
+const mctx = maskCanvas.getContext('2d', {willReadFrequently:true});
+const brushCursor = document.getElementById('brushCursor');
+const brushSize = document.getElementById('brushSize');
+const brushSizeLabel = document.getElementById('brushSizeLabel');
+const eraseBtn = document.getElementById('eraseBtn');
+const undoBtn = document.getElementById('undoBtn');
+const clearMaskBtn = document.getElementById('clearMaskBtn');
+const resetBtn = document.getElementById('resetBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const processingOverlay = document.getElementById('processingOverlay');
+const processingText = document.getElementById('processingText');
 
-    <div class="container" id="processing-screen">
-        <i class="fas fa-cog gear"></i>
-        <p style="letter-spacing: 2px; color: #888;">CALIBRANDO RESULTADOS NEURONALES...</p>
-        <div id="timer">00:00:00</div>
-    </div>
+let W = 0, H = 0;
+let drawing = false;
+let hasMask = false;
+let history = [];
+const MAX_W = 900, MAX_H = 620;
 
-    <div class="container" id="result-screen">
-        <div class="sub-title">ESCANEO FINALIZADO</div>
-        <div class="percent" id="final-percent">0%</div>
-        <p id="final-msg" style="line-height: 1.8; color: #bbb;"></p>
-    </div>
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-    <div class="close-x" id="exit-btn" onclick="location.reload()">×</div>
+function loadImageFile(file){
+  if(!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(MAX_W / img.naturalWidth, MAX_H / img.naturalHeight, 1);
+      W = Math.max(1, Math.round(img.naturalWidth * scale));
+      H = Math.max(1, Math.round(img.naturalHeight * scale));
+      workCanvas.width = W; workCanvas.height = H;
+      maskCanvas.width = W; maskCanvas.height = H;
+      workCanvas.style.width = W + 'px'; workCanvas.style.height = H + 'px';
+      maskCanvas.style.width = W + 'px'; maskCanvas.style.height = H + 'px';
+      ctx.drawImage(img, 0, 0, W, H);
+      mctx.clearRect(0, 0, W, H);
+      dropzone.hidden = true;
+      canvasWrap.hidden = false;
+      history = [ctx.getImageData(0, 0, W, H)];
+      hasMask = false;
+      setControlsEnabled(true);
+      updateEraseBtn();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
-    <script>
-        // Banco de preguntas profundas
-        const bank = [
-            { t: 'choice', q: '¿Cómo reaccionas ante un sonido agudo o repetitivo que otros parecen no notar?', o: ['Siento una molestia física real', 'Me desconcentro totalmente', 'Lo noto pero puedo ignorarlo', 'No me afecta'] },
-            { t: 'choice', q: 'En una conversación, ¿qué tanto esfuerzo dedicas a mantener el contacto visual?', o: ['Es agotador y me distrae de lo que dicen', 'Lo fuerzo para parecer "normal"', 'Lo hago de forma natural', 'Prefiero mirar a otros lados'] },
-            { t: 'text', q: 'Escribe sobre una situación donde sentiste que las reglas sociales eran confusas o sin sentido para ti.' },
-            { t: 'choice', q: '¿Sueles tener intereses tan intensos que olvidas comer o dormir?', o: ['Sí, es mi estado constante', 'A veces con temas específicos', 'Rara vez', 'Nunca'] },
-            { t: 'choice', q: '¿Cómo describirías tu forma de organizar tus objetos personales?', o: ['Tienen un orden lógico estricto', 'Me molesta mucho si alguien los mueve', 'Ordenado pero flexible', 'Caótico'] },
-            { t: 'text', q: 'Si pudieras diseñar un mundo perfecto para tu comodidad, ¿cómo sería el ambiente y la gente?' }
-        ];
+uploadBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => loadImageFile(e.target.files[0]));
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  loadImageFile(e.dataTransfer.files[0]);
+});
 
-        let currentQuestions = [];
-        let currentIndex = 0;
-        let score = 0;
+function setControlsEnabled(on){
+  downloadBtn.disabled = !on;
+  clearMaskBtn.disabled = !on;
+  resetBtn.disabled = !on;
+  undoBtn.disabled = history.length <= 1;
+}
 
-        function startTest(num) {
-            document.getElementById('main-menu').style.display = 'none';
-            const loader = document.getElementById('loader-screen');
-            loader.style.display = 'flex';
-            
-            let i = 0;
-            const logs = ["ACCESSING_CORE...", "READING_SYNAPSES...", "MAPPING_SENSORY_DATA...", "FILTERING_NOISE...", "COMPILING_PROFILE..."];
-            const interval = setInterval(() => {
-                document.getElementById('matrix-lines').innerHTML += `> ${logs[i % logs.length]}<br>`;
-                i++;
-                if(i > 10) { clearInterval(interval); loader.style.display = 'none'; initTest(num); }
-            }, 180);
-        }
+brushSize.addEventListener('input', () => {
+  brushSizeLabel.textContent = brushSize.value;
+  updateCursorSize();
+});
+function updateCursorSize(){
+  const s = brushSize.value;
+  brushCursor.style.width = s + 'px';
+  brushCursor.style.height = s + 'px';
+}
+updateCursorSize();
 
-        function initTest(num) {
-            document.getElementById('test-area').style.display = 'block';
-            // Generar mezcla de preguntas del banco + aleatorias para completar el número
-            currentQuestions = [];
-            for(let i=0; i<num; i++) {
-                let base = bank[i % bank.length];
-                currentQuestions.push({...base});
-            }
-            showQuestion();
-        }
+function getPos(e){
+  const rect = maskCanvas.getBoundingClientRect();
+  const scaleX = maskCanvas.width / rect.width;
+  const scaleY = maskCanvas.height / rect.height;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY,
+    cx: clientX - rect.left,
+    cy: clientY - rect.top
+  };
+}
 
-        function showQuestion() {
-            const container = document.getElementById('question-container');
-            const q = currentQuestions[currentIndex];
-            let html = `<p style="color: #444; font-size: 0.7rem;">ANÁLISIS DE SISTEMA ${currentIndex + 1} / ${currentQuestions.length}</p>
-                        <h2 style="font-weight: 300; margin-bottom: 30px;">${q.q}</h2>`;
+function drawDot(x, y){
+  const r = parseInt(brushSize.value, 10) / 2;
+  mctx.beginPath();
+  mctx.arc(x, y, r, 0, Math.PI * 2);
+  mctx.fillStyle = 'rgba(139,92,255,0.55)';
+  mctx.fill();
+  hasMask = true;
+  updateEraseBtn();
+}
 
-            if(q.t === 'choice') {
-                q.o.forEach((opt, idx) => {
-                    html += `<button class="btn-ans" onclick="handleAns(${3 - idx})">${opt}</button>`;
-                });
-            } else {
-                html += `<textarea id="text-ans" rows="5" placeholder="Escribe tu análisis interno..."></textarea>
-                         <button class="btn-ans" style="text-align:center; border-color: var(--accent-green); color: white;" onclick="handleAns(3)">ENVIAR RESPUESTA AL SISTEMA</button>`;
-            }
-            container.innerHTML = html;
-        }
+let lastPos = null;
+function pointerDown(e){
+  if(canvasWrap.hidden) return;
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  lastPos = p;
+  drawDot(p.x, p.y);
+}
+function pointerMove(e){
+  const p = getPos(e);
+  brushCursor.style.left = p.cx + 'px';
+  brushCursor.style.top = p.cy + 'px';
+  if(!drawing) return;
+  e.preventDefault();
+  if(lastPos){
+    const dist = Math.hypot(p.x - lastPos.x, p.y - lastPos.y);
+    const steps = Math.max(1, Math.floor(dist / 4));
+    for(let i = 1; i <= steps; i++){
+      const ix = lastPos.x + (p.x - lastPos.x) * (i / steps);
+      const iy = lastPos.y + (p.y - lastPos.y) * (i / steps);
+      drawDot(ix, iy);
+    }
+  }
+  lastPos = p;
+}
+function pointerUp(){ drawing = false; lastPos = null; }
 
-        function handleAns(pts) {
-            score += pts;
-            currentIndex++;
-            if(currentIndex < currentQuestions.length) showQuestion();
-            else finishProcessing();
-        }
+maskCanvas.addEventListener('mousedown', pointerDown);
+maskCanvas.addEventListener('mousemove', pointerMove);
+window.addEventListener('mouseup', pointerUp);
+maskCanvas.addEventListener('touchstart', pointerDown, {passive:false});
+maskCanvas.addEventListener('touchmove', pointerMove, {passive:false});
+window.addEventListener('touchend', pointerUp);
+maskCanvas.addEventListener('mouseenter', () => brushCursor.style.opacity = 1);
+maskCanvas.addEventListener('mouseleave', () => brushCursor.style.opacity = 0);
 
-        function finishProcessing() {
-            document.getElementById('test-area').style.display = 'none';
-            document.getElementById('processing-screen').style.display = 'block';
-            let sec = 0;
-            const int = setInterval(() => {
-                sec += 0.01;
-                document.getElementById('timer').innerText = sec.toFixed(2).replace('.', ':');
-            }, 10);
+function updateEraseBtn(){ eraseBtn.disabled = !hasMask; }
 
-            setTimeout(() => {
-                clearInterval(int);
-                showResult();
-            }, Math.random() * 4000 + 6000);
-        }
+clearMaskBtn.addEventListener('click', () => {
+  mctx.clearRect(0, 0, W, H);
+  hasMask = false;
+  updateEraseBtn();
+});
 
-        function showResult() {
-            document.getElementById('processing-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'block';
-            const p = Math.min(Math.round((score / (currentQuestions.length * 2.5)) * 100), 100);
-            document.getElementById('final-percent').innerText = p + "%";
-            document.getElementById('final-msg').innerText = "Tu perfil neurodivergente ha sido analizado con éxito. Tienes una forma increíblemente detallada de percibir la realidad, lo que te permite notar cosas que otros ignoran. Este resultado es un reflejo de tu singularidad.";
-            
-            setTimeout(() => { document.getElementById('exit-btn').style.display = 'block'; }, 10000);
-        }
-    </script>
+undoBtn.addEventListener('click', () => {
+  if(history.length > 1){
+    history.pop();
+    ctx.putImageData(history[history.length - 1], 0, 0);
+  }
+  undoBtn.disabled = history.length <= 1;
+});
+
+resetBtn.addEventListener('click', () => {
+  canvasWrap.hidden = true;
+  dropzone.hidden = false;
+  history = [];
+  hasMask = false;
+  fileInput.value = '';
+  setControlsEnabled(false);
+});
+
+downloadBtn.addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'vanish-editado.png';
+  link.href = workCanvas.toDataURL('image/png');
+  link.click();
+});
+
+let processing = false;
+function yieldFrame(){ return new Promise(r => requestAnimationFrame(() => r())); }
+
+eraseBtn.addEventListener('click', async () => {
+  if(!hasMask || processing) return;
+  processing = true;
+  eraseBtn.disabled = true;
+  uploadBtn.disabled = true;
+  clearMaskBtn.disabled = true;
+  undoBtn.disabled = true;
+  resetBtn.disabled = true;
+  processingOverlay.hidden = false;
+  processingText.textContent = 'Rellenando…';
+  await yieldFrame();
+  try {
+    await runInpaint();
+    history.push(ctx.getImageData(0, 0, W, H));
+  } catch(err){
+    console.error('Inpaint error:', err);
+    processingText.textContent = 'Ocurrió un error, intenta con un área más pequeña';
+    await sleep(1000);
+  } finally {
+    mctx.clearRect(0, 0, W, H);
+    hasMask = false;
+    processing = false;
+    processingOverlay.hidden = true;
+    uploadBtn.disabled = false;
+    clearMaskBtn.disabled = false;
+    resetBtn.disabled = false;
+    undoBtn.disabled = history.length <= 1;
+    updateEraseBtn();
+  }
+});
+
+// ---------- INPAINTING: recorta solo la zona pintada y rellena ahí ----------
+// Clave para la velocidad: en vez de trabajar sobre el lienzo completo,
+// se recorta el rectángulo de lo que pintaste (con un margen) y todo el
+// cálculo ocurre solo dentro de ese recorte, casi siempre pequeño.
+
+function resizeRGBA(data, sw, sh, dw, dh){
+  const dst = new Uint8ClampedArray(dw * dh * 4);
+  for(let y = 0; y < dh; y++){
+    const syf = dh > 1 ? (y + 0.5) * sh / dh - 0.5 : 0;
+    let y0 = Math.floor(syf); if(y0 < 0) y0 = 0; if(y0 > sh - 1) y0 = sh - 1;
+    let y1 = y0 + 1; if(y1 > sh - 1) y1 = sh - 1;
+    const wy = syf - y0;
+    for(let x = 0; x < dw; x++){
+      const sxf = dw > 1 ? (x + 0.5) * sw / dw - 0.5 : 0;
+      let x0 = Math.floor(sxf); if(x0 < 0) x0 = 0; if(x0 > sw - 1) x0 = sw - 1;
+      let x1 = x0 + 1; if(x1 > sw - 1) x1 = sw - 1;
+      const wx = sxf - x0;
+      const i00 = (y0 * sw + x0) * 4, i10 = (y0 * sw + x1) * 4;
+      const i01 = (y1 * sw + x0) * 4, i11 = (y1 * sw + x1) * 4;
+      const di = (y * dw + x) * 4;
+      for(let c = 0; c < 4; c++){
+        const top = data[i00 + c] + (data[i10 + c] - data[i00 + c]) * wx;
+        const bot = data[i01 + c] + (data[i11 + c] - data[i01 + c]) * wx;
+        dst[di + c] = top + (bot - top) * wy;
+      }
+    }
+  }
+  return dst;
+}
+
+// Difusión Gauss-Seidel multiescala, operando solo dentro de un recorte pequeño.
+async function diffuseInpaint(cropSrc, cropMaskAlpha, cw, ch){
+  const sizes = [];
+  let w = cw, h = ch;
+  const minDim = 16;
+  let guard = 0;
+  while(true){
+    sizes.unshift({ w, h });
+    if(Math.max(w, h) <= minDim || guard > 12) break;
+    w = Math.max(1, Math.round(w * 0.55));
+    h = Math.max(1, Math.round(h * 0.55));
+    guard++;
+  }
+
+  const iterCounts = [140, 90, 60, 40, 25, 16, 10, 6];
+  let buffer = null;
+  let prevW = 0, prevH = 0;
+  let topBuffer = null;
+
+  for(let li = 0; li < sizes.length; li++){
+    const lw = sizes[li].w, lh = sizes[li].h;
+
+    const lvlSrc = (lw === cw && lh === ch) ? cropSrc : resizeRGBA(cropSrc, cw, ch, lw, lh);
+    const lvlMaskRGBA = (lw === cw && lh === ch) ? cropMaskAlpha : resizeRGBA(cropMaskAlpha, cw, ch, lw, lh);
+
+    const maskedList = [];
+    const inMask = new Uint8Array(lw * lh);
+    for(let i = 0; i < lw * lh; i++){
+      if(lvlMaskRGBA[i * 4 + 3] > 25){ inMask[i] = 1; maskedList.push(i); }
+    }
+
+    const buf = new Float32Array(lw * lh * 3);
+
+    if(li === 0){
+      let rs = 0, gs = 0, bs = 0, cnt = 0;
+      for(let i = 0; i < lw * lh; i++){
+        if(!inMask[i]){ rs += lvlSrc[i*4]; gs += lvlSrc[i*4+1]; bs += lvlSrc[i*4+2]; cnt++; }
+      }
+      const mr = cnt ? rs/cnt : 128, mg = cnt ? gs/cnt : 128, mb = cnt ? bs/cnt : 128;
+      for(let i = 0; i < lw * lh; i++){
+        if(inMask[i]){ buf[i*3]=mr; buf[i*3+1]=mg; buf[i*3+2]=mb; }
+        else { buf[i*3]=lvlSrc[i*4]; buf[i*3+1]=lvlSrc[i*4+1]; buf[i*3+2]=lvlSrc[i*4+2]; }
+      }
+    } else {
+      const prevRGBA = new Uint8ClampedArray(prevW * prevH * 4);
+      for(let i = 0; i < prevW * prevH; i++){
+        prevRGBA[i*4] = buffer[i*3]; prevRGBA[i*4+1] = buffer[i*3+1]; prevRGBA[i*4+2] = buffer[i*3+2]; prevRGBA[i*4+3] = 255;
+      }
+      const upRGBA = resizeRGBA(prevRGBA, prevW, prevH, lw, lh);
+      for(let i = 0; i < lw * lh; i++){
+        if(inMask[i]){ buf[i*3]=upRGBA[i*4]; buf[i*3+1]=upRGBA[i*4+1]; buf[i*3+2]=upRGBA[i*4+2]; }
+        else { buf[i*3]=lvlSrc[i*4]; buf[i*3+1]=lvlSrc[i*4+1]; buf[i*3+2]=lvlSrc[i*4+2]; }
+      }
+    }
+
+    const iters = iterCounts[li] !== undefined ? iterCounts[li] : 4;
+    const nMasked = maskedList.length;
+    for(let it = 0; it < iters && nMasked > 0; it++){
+      for(let k = 0; k < nMasked; k++){
+        const idx = maskedList[k];
+        const x = idx % lw, y = (idx - x) / lw;
+        let rs=0, gs=0, bs=0, n=0;
+        if(x>0){ const j=idx-1; rs+=buf[j*3]; gs+=buf[j*3+1]; bs+=buf[j*3+2]; n++; }
+        if(x<lw-1){ const j=idx+1; rs+=buf[j*3]; gs+=buf[j*3+1]; bs+=buf[j*3+2]; n++; }
+        if(y>0){ const j=idx-lw; rs+=buf[j*3]; gs+=buf[j*3+1]; bs+=buf[j*3+2]; n++; }
+        if(y<lh-1){ const j=idx+lw; rs+=buf[j*3]; gs+=buf[j*3+1]; bs+=buf[j*3+2]; n++; }
+        if(n>0){ buf[idx*3]=rs/n; buf[idx*3+1]=gs/n; buf[idx*3+2]=bs/n; }
+      }
+      // cede el control cada pocas iteraciones, solo si el recorte es grande
+      if((lw * lh) > 40000 && it % 4 === 3) await yieldFrame();
+    }
+
+    if(li === sizes.length - 1) topBuffer = buf;
+    buffer = buf; prevW = lw; prevH = lh;
+  }
+
+  return topBuffer;
+}
+
+async function runInpaint(){
+  const srcImgData = ctx.getImageData(0, 0, W, H);
+  const maskImgData = mctx.getImageData(0, 0, W, H);
+  const srcData = srcImgData.data;
+  const maskData = maskImgData.data;
+
+  // 1) encontrar el rectángulo de lo pintado
+  let minX = W, minY = H, maxX = -1, maxY = -1;
+  for(let y = 0; y < H; y++){
+    const rowBase = y * W;
+    for(let x = 0; x < W; x++){
+      if(maskData[(rowBase + x) * 4 + 3] > 25){
+        if(x < minX) minX = x; if(x > maxX) maxX = x;
+        if(y < minY) minY = y; if(y > maxY) maxY = y;
+      }
+    }
+  }
+  if(maxX < 0) return; // no hay nada pintado
+
+  const pad = 22;
+  minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
+  maxX = Math.min(W - 1, maxX + pad); maxY = Math.min(H - 1, maxY + pad);
+  const cw = maxX - minX + 1, ch = maxY - minY + 1;
+
+  // 2) recortar imagen y máscara a ese rectángulo únicamente
+  const cropSrc = new Uint8ClampedArray(cw * ch * 4);
+  const cropMask = new Uint8ClampedArray(cw * ch * 4);
+  for(let y = 0; y < ch; y++){
+    const fullRow = (minY + y) * W;
+    const cropRow = y * cw;
+    for(let x = 0; x < cw; x++){
+      const fi = (fullRow + minX + x) * 4;
+      const ci = (cropRow + x) * 4;
+      cropSrc[ci] = srcData[fi]; cropSrc[ci+1] = srcData[fi+1]; cropSrc[ci+2] = srcData[fi+2]; cropSrc[ci+3] = 255;
+      cropMask[ci+3] = maskData[fi+3];
+    }
+  }
+
+  await yieldFrame();
+
+  // 3) rellenar solo dentro del recorte
+  const result = await diffuseInpaint(cropSrc, cropMask, cw, ch);
+
+  // 4) escribir de vuelta únicamente los píxeles marcados
+  for(let y = 0; y < ch; y++){
+    const fullRow = (minY + y) * W;
+    const cropRow = y * cw;
+    for(let x = 0; x < cw; x++){
+      const ci = cropRow + x;
+      if(cropMask[ci * 4 + 3] > 25){
+        const fi = (fullRow + minX + x) * 4;
+        srcData[fi] = result[ci*3];
+        srcData[fi+1] = result[ci*3+1];
+        srcData[fi+2] = result[ci*3+2];
+      }
+    }
+  }
+  ctx.putImageData(srcImgData, 0, 0);
+}
+</script>
 </body>
 </html>
